@@ -3,7 +3,6 @@ module awesomeProjectCr
 go 1.24.0
 
 require (
-	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-chi/httprate v0.15.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
@@ -26,6 +25,7 @@ require (
 	github.com/elastic/go-sysinfo v1.7.1 // indirect
 	github.com/elastic/go-windows v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/go-chi/chi v1.5.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect

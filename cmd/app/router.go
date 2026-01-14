@@ -5,7 +5,7 @@ import (
 	"awesomeProjectCr/internal/handler"
 	"awesomeProjectCr/pkg/middleware"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"go.elastic.co/apm/module/apmchi/v2"
 )
