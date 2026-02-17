@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 	"go.elastic.co/apm/module/apmsql/v2"
 	_ "go.elastic.co/apm/module/apmsql/v2/pq"
 )
@@ -97,47 +95,6 @@ func Get() *sql.DB {
 
 func GetSlave() *sql.DB {
 	return slaveDB
-}
-
-func newContext(ctx context.Context, tx *sqlx.Tx) context.Context {
-	return context.WithValue(ctx, dbKey, tx)
-}
-
-func GetTx(ctx context.Context) *sqlx.Tx {
-	tx, ok := ctx.Value(dbKey).(*sqlx.Tx)
-	if !ok {
-		panic("No DB transaction found in context")
-	}
-	return tx
-}
-
-func Transact(ctx context.Context, dbx *sqlx.DB, opts *sql.TxOptions, txFunc func(context.Context) error) (err error) {
-	tx, err := dbx.BeginTxx(ctx, opts)
-	if err != nil {
-		return
-	}
-	defer func() {
-		if p := recover(); p != nil {
-			switch p := p.(type) {
-			case error:
-				err = errors.WithStack(p)
-			default:
-				err = errors.Errorf("%s", p)
-			}
-		}
-		if err != nil {
-			e := tx.Rollback()
-			if e != nil {
-				err = errors.WithStack(e)
-			}
-			return
-		}
-		err = errors.WithStack(tx.Commit())
-	}()
-
-	ctxWithTx := newContext(ctx, tx)
-	err = WithDefaultTimeout(ctxWithTx, txFunc)
-	return err
 }
 
 func WithTimeout(ctx context.Context, timeout time.Duration, op func(ctx context.Context) error) (err error) {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
-	"go.elastic.co/apm/module/apmchi/v2"
 )
 
 func newRouter() *chi.Mux {
@@ -15,8 +14,6 @@ func newRouter() *chi.Mux {
 	router.Use(chiMiddleware.RequestID)
 
 	router.Use(middleware.Recover())
-
-	router.Use(apmchi.Middleware())
 
 	return router
 

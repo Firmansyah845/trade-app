@@ -7,14 +7,12 @@ require (
 	github.com/go-chi/httprate v0.15.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.34.0
 	github.com/shopspring/decimal v1.2.0
 	github.com/spf13/viper v1.21.0
 	github.com/urfave/cli/v2 v2.27.7
-	go.elastic.co/apm/module/apmchi/v2 v2.7.2
 	go.elastic.co/apm/module/apmsql/v2 v2.7.2
 )
 
@@ -25,7 +23,6 @@ require (
 	github.com/elastic/go-sysinfo v1.7.1 // indirect
 	github.com/elastic/go-windows v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/go-chi/chi v1.5.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
@@ -44,7 +41,6 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
-	go.elastic.co/apm/module/apmhttp/v2 v2.7.2 // indirect
 	go.elastic.co/apm/v2 v2.7.2 // indirect
 	go.elastic.co/fastjson v1.5.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
