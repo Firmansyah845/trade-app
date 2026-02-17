@@ -6,6 +6,7 @@ type ServerConfig struct {
 	Port         int
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
+	IdleTimeout  time.Duration
 }
 
 var Server ServerConfig
@@ -15,5 +16,6 @@ func initServerConfig() {
 		Port:         mustGetInt("SERVER_PORT"),
 		ReadTimeout:  mustGetDurationMs("READ_TIMEOUT_MS"),
 		WriteTimeout: mustGetDurationMs("WRITE_TIMEOUT_MS"),
+		IdleTimeout:  mustGetDurationMs("IDLE_TIMEOUT_MS"),
 	}
 }

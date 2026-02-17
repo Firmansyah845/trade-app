@@ -1,44 +1,45 @@
 package app
 
 import (
+	"time"
+
 	"awesomeProjectCr/internal/database"
 	"awesomeProjectCr/internal/handler"
 	"awesomeProjectCr/pkg/middleware"
 
-	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/gin-gonic/gin"
 )
 
-func newRouter() *chi.Mux {
-	router := chi.NewRouter()
-	router.Use(chiMiddleware.RequestID)
+var rateLimiterStore = middleware.NewRateLimiterStore(
+	60,            // 60 requests per minute
+	10,            // burst up to 10
+	5*time.Minute, // cleanup visitors inactive for 5 minutes
+)
 
-	router.Use(middleware.Recover())
+func newRouter() *gin.Engine {
+	routerGinNew := gin.New()
+	routerGinNew.Use(gin.Logger())
+	routerGinNew.Use(middleware.RequestID())
+	routerGinNew.Use(middleware.Recover())
+	routerGinNew.Use(rateLimiterStore.Middleware())
 
-	return router
-
+	return routerGinNew
 }
 
-func router() *chi.Mux {
-	router := newRouter()
+func router() *gin.Engine {
+	routerInit := newRouter()
 
-	router.Get("/ping", handler.Ping)
+	routerInit.GET("/ping", handler.Ping)
 
 	dbConnection := database.DBConnection
-
 	postgreDB := dbConnection[database.PostgresDb]
-
 	handlerR := handler.NewHandler(postgreDB)
 
-	router.Get("/health-check", handlerR.HealthCheck)
+	routerInit.GET("/health-check", handlerR.HealthCheck)
 
-	router.Group(func(s chi.Router) {
-		s.Route("/api/v1", func(rApi chi.Router) {
-
-			rApi.Post("/order", handlerR.CreateOrder)
-		})
-	})
-
-	return router
-
+	v1 := routerInit.Group("/api/v1")
+	{
+		v1.POST("/order", handlerR.CreateOrder)
+	}
+	return routerInit
 }

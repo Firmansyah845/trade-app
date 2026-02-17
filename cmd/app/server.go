@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 
 	"awesomeProjectCr/internal/config"
 
@@ -27,32 +28,42 @@ func New() *Server {
 			Handler:      handler,
 			ReadTimeout:  config.Server.ReadTimeout,
 			WriteTimeout: config.Server.WriteTimeout,
+			IdleTimeout:  config.Server.IdleTimeout,
 		},
 	}
 
 	return server
 }
-func (s *Server) Start(ctx context.Context, cancel context.CancelFunc) {
-	go s.waitForShutDown(ctx, cancel)
 
-	startupMessage := fmt.Sprintf("Starting server on port %s...", strconv.Itoa(config.Server.Port))
-	log.Info().Msg(startupMessage)
+func (s *Server) Start(ctx context.Context, cancel context.CancelFunc) {
+	go s.waitForShutdown(ctx, cancel)
+
+	log.Info().Msg(fmt.Sprintf("starting server on port %d...", config.Server.Port))
 
 	go func() {
-		err := s.server.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			log.Error().Err(err).Msg(err.Error())
+		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Error().Err(err).Msg("server failed to start")
 			cancel()
 		}
 	}()
 }
 
-func (s *Server) waitForShutDown(ctx context.Context, cancel context.CancelFunc) {
+func (s *Server) waitForShutdown(ctx context.Context, cancel context.CancelFunc) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	<-stop
-	log.Info().Msg("stopping server")
-	_ = s.server.Shutdown(ctx)
 
-	cancel() // call the cancelFunc to close the shared interrupt channel between REST and gRPC and shutdown both servers
+	<-stop
+
+	log.Info().Msg("shutdown signal received, gracefully stopping server...")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 10*time.Second)
+	defer shutdownCancel()
+
+	if err := s.server.Shutdown(shutdownCtx); err != nil {
+		log.Error().Err(err).Msg("server forced to shutdown due to timeout")
+	} else {
+		log.Info().Msg("server stopped gracefully")
+	}
+
+	cancel()
 }

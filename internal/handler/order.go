@@ -2,29 +2,29 @@ package handler
 
 import (
 	"awesomeProjectCr/internal/order"
-	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
-func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (h *Handler) CreateOrder(c *gin.Context) {
+	ctx := c.Request.Context()
 
 	log.Info().
-		Str("method", r.Method).
-		Str("path", r.URL.Path).
-		Str("remote_addr", r.RemoteAddr).
+		Str("method", c.Request.Method).
+		Str("path", c.Request.URL.Path).
+		Str("remote_addr", c.ClientIP()).
 		Msg("received create order request")
 
 	var req order.CreateOrderRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Warn().
 			Err(err).
-			Str("remote_addr", r.RemoteAddr).
+			Str("remote_addr", c.ClientIP()).
 			Msg("invalid request body for create order")
 
-		asErrorResponse(w, http.StatusBadRequest, err.Error())
+		asErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -41,7 +41,7 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 			Int64("user_id", req.UserID).
 			Str("stock_code", req.StockCode).
 			Msg("failed to process order in handler")
-		asErrorResponse(w, http.StatusInternalServerError, err.Error())
+		asErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -62,5 +62,5 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 			Msg("order created successfully in handler")
 	}
 
-	asJsonResponse(w, statusCode, "create order success", resp)
+	asJsonResponse(c, statusCode, "create order success", resp)
 }

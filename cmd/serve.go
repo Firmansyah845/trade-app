@@ -2,25 +2,28 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	"awesomeProjectCr/cmd/app"
 
 	"github.com/rs/zerolog/log"
 )
 
-// StartServer : Starts the server both the gRPC and REST servers.
 func StartServer() {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	startServer(ctx, cancel)
+	s := app.New()
+	s.Start(ctx, cancel)
 
 	<-ctx.Done()
-	log.Info().Msg("All servers stopped")
-}
 
-func startServer(ctx context.Context, cancel context.CancelFunc) {
-	s := app.New()
+	log.Info().Msg("all servers stopped")
 
-	s.Start(ctx, cancel)
+	if err := ctx.Err(); err != nil && err != context.Canceled {
+		log.Error().Err(err).Msg("server stopped due to unexpected error")
+		os.Exit(1)
+	}
+
+	os.Exit(0)
 }

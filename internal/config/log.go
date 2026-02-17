@@ -17,10 +17,34 @@ func initLogConfig() {
 	}
 
 	zerolog.SetGlobalLevel(level)
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs // lebih presisi, lebih ringan dari ISO8601
 
-	log.Logger = zerolog.New(os.Stdout).
-		With().
-		Timestamp().
-		Caller().
-		Logger()
+	env := strings.ToLower(mustGetString("APP_ENV"))
+
+	var logger zerolog.Logger
+	if env == "development" || env == "local" {
+		// pretty print untuk development
+		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout}).
+			With().
+			Timestamp().
+			Caller().
+			Str("service", mustGetString("APP_NAME")).
+			Logger()
+	} else {
+		// pure JSON untuk production/staging
+		logger = zerolog.New(os.Stdout).
+			With().
+			Timestamp().
+			Caller().
+			Str("service", mustGetString("APP_NAME")).
+			Str("env", env).
+			Logger()
+	}
+
+	log.Logger = logger
+
+	log.Info().
+		Str("level", level.String()).
+		Str("env", env).
+		Msg("logger initialized")
 }

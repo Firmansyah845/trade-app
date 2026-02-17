@@ -23,9 +23,15 @@ func InitDB() {
 		ConnMaxLifeTime: config.Database.ConnectionMaxLifeTime,
 	}
 
-	mysqlDB, err := db.NewDB(&dbConfig)
+	postgresDB, err := db.NewDB(&dbConfig)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to connect to database")
+		log.Fatal().Err(err).Msg("failed to connect to postgres database")
 	}
-	DBConnection[PostgresDb] = mysqlDB
+
+	DBConnection[PostgresDb] = postgresDB
+
+	log.Info().
+		Str("database", PostgresDb).
+		Int("max_pool_size", config.Database.MaxPoolSize).
+		Msg("database connection established")
 }

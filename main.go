@@ -6,7 +6,13 @@ import (
 	"awesomeProjectCr/cmd"
 	"awesomeProjectCr/cmd/app"
 
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+)
+
+var (
+	Version   = "development"
+	BuildTime = "unknown"
 )
 
 func main() {
@@ -15,11 +21,15 @@ func main() {
 
 	cliApp := cli.NewApp()
 	cliApp.Name = "awesomeProjectCr"
+	cliApp.Version = Version
+	cliApp.Metadata = map[string]interface{}{
+		"buildTime": BuildTime,
+	}
 
 	cliApp.Commands = cli.Commands{
 		{
 			Name:  "server",
-			Usage: "Start server",
+			Usage: "Start REST server",
 			Action: func(c *cli.Context) error {
 				cmd.StartServer()
 				return nil
@@ -28,6 +38,6 @@ func main() {
 	}
 
 	if err := cliApp.Run(os.Args); err != nil {
-		panic(err)
+		log.Fatal().Err(err).Msg("failed to run application")
 	}
 }

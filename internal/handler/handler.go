@@ -4,8 +4,9 @@ import (
 	"awesomeProjectCr/internal/health_checks"
 	"awesomeProjectCr/internal/order"
 	"database/sql"
-	"encoding/json"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -35,32 +36,23 @@ type ErrorResponse struct {
 	Code    int    `json:"code"`
 }
 
-func asJsonResponse(w http.ResponseWriter, httpStatus int, message string, data any) {
-	response := Response{
+func asJsonResponse(c *gin.Context, httpStatus int, message string, data any) {
+	c.JSON(httpStatus, Response{
 		Message:    message,
 		Data:       data,
 		StatusCode: httpStatus,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpStatus)
-
-	_ = json.NewEncoder(w).Encode(response)
+	})
 }
 
-func asErrorResponse(w http.ResponseWriter, httpStatus int, message string) {
-	response := ErrorResponse{
+func asErrorResponse(c *gin.Context, httpStatus int, message string) {
+	c.JSON(httpStatus, ErrorResponse{
 		Message: message,
 		Code:    httpStatus,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpStatus)
-
-	_ = json.NewEncoder(w).Encode(response)
+	})
 }
 
-func asInternalErrorResponse(w http.ResponseWriter, err error) {
-	w.WriteHeader(http.StatusInternalServerError)
-	_, _ = w.Write([]byte(err.Error()))
+func asInternalErrorResponse(c *gin.Context, err error) {
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"message": err.Error(),
+	})
 }
